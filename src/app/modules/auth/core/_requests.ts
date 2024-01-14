@@ -1,5 +1,5 @@
 import axios from "axios";
-import { AuthModel, UserModel } from "./_models";
+import { LoginResponse, UserModel } from "./_models";
 
 const API_URL = import.meta.env.VITE_APP_API_URL;
 
@@ -10,7 +10,7 @@ export const REQUEST_PASSWORD_URL = `${API_URL}/forgot_password`;
 
 // Server should return AuthModel
 export function login(email: string, password: string) {
-  return axios.post<AuthModel & UserModel>(LOGIN_URL, {
+  return axios.post<LoginResponse>(LOGIN_URL, {
     email,
     password,
   });
