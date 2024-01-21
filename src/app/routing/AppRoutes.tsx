@@ -25,23 +25,26 @@ const AppRoutes: FC = () => {
     <BrowserRouter basename={BASE_URL}>
       <Routes>
         <Route element={<App />}>
-          <Route path='error/*' element={<ErrorsPage />} />
-          <Route path='logout' element={<Logout />} />
+          <Route path="error/*" element={<ErrorsPage />} />
+          <Route path="logout" element={<Logout />} />
           {currentUser ? (
             <>
-              <Route path='/*' element={<PrivateRoutes />} />
-              <Route index element={<Navigate to='/dashboard' />} />
+              <Route path="/*" element={<PrivateRoutes />} />
+              <Route
+                index
+                element={<Navigate to="/crafted/pages/profile/overview" />}
+              />
             </>
           ) : (
             <>
-              <Route path='auth/*' element={<AuthPage />} />
-              <Route path='*' element={<Navigate to='/auth' />} />
+              <Route path="auth/*" element={<AuthPage />} />
+              <Route path="*" element={<Navigate to="/auth" />} />
             </>
           )}
         </Route>
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
 export {AppRoutes}

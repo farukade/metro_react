@@ -1,6 +1,26 @@
 export interface LoginResponse {
   success: boolean;
+  message: string;
   data: UserModel & AuthModel;
+}
+export interface TransactionsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    result: TransactionModel[];
+    totalSpent: number;
+    totalSpentPrevious: number;
+    transactionCount: number;
+    transactionCountPrevious: number;
+    percentageDifference: number;
+    difference: number;
+  };
+}
+
+export interface TransactionResponse {
+  success: boolean;
+  message: string;
+  data: TransactionModel;
 }
 
 export interface AuthModel {
@@ -50,30 +70,39 @@ export interface UserSocialNetworksModel {
 
 export interface UserModel {
   id: number;
-  username: string;
   password: string | undefined;
   email: string;
   unitBalance: number;
   openingBalance: number;
-  first_name: string;
-  last_name: string;
-  fullname?: string;
+  firstName: string;
+  lastName: string;
   occupation?: string;
   totalSpent?: number;
   transactionCount?: number;
   totalSpentPrevious?: number;
   transactionCountPrevious?: number;
   percentageDifference?: number;
-  companyName?: string;
+  difference?: number;
   phone?: string;
   roles?: Array<number>;
-  pic?: string;
+  image?: string;
   language?: "en" | "de" | "es" | "fr" | "ja" | "zh" | "ru";
   timeZone?: string;
   website?: "https://keenthemes.com";
   emailSettings?: UserEmailSettingsModel;
   auth?: AuthModel;
   communication?: UserCommunicationModel;
-  address?: UserAddressModel;
+  address?: string;
   socialNetworks?: UserSocialNetworksModel;
+  type: string;
+  token: string;
+}
+
+export interface TransactionModel {
+  id?: number;
+  date: Date;
+  description: string;
+  amount: number;
+  mode: string;
+  unitValue: number;
 }

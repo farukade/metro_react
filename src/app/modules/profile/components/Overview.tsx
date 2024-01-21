@@ -1,39 +1,32 @@
-import { Content } from '../../../../_metronic/layout/components/content'
-import {
-  FeedsWidget2,
-  FeedsWidget3,
-  FeedsWidget4,
-  FeedsWidget5,
-  FeedsWidget6,
-  ChartsWidget1,
-  ListsWidget5,
-  ListsWidget2,
-} from '../../../../_metronic/partials/widgets'
+import { useState } from "react";
+import { Content } from "../../../../_metronic/layout/components/content";
+import { TransactionForm } from "../../../../_metronic/partials/modals/transaction/TransactionForm";
+import { TablesWidget9 } from "../../../../_metronic/partials/widgets";
+import { TransactionModel } from "../../auth/core/_models";
 
 export function Overview() {
+  const [transactionOpen, setTransactionOpen] = useState(false);
+  const [transactions, setTransactions] = useState<TransactionModel[]>([]);
   return (
     <Content>
-      <div className='row g-5 g-xxl-8'>
-        <div className='col-xl-6'>
-          <FeedsWidget2 className='mb-5 mb-xxl-8' />
-
-          <FeedsWidget3 className='mb-5 mb-xxl-8' />
-
-          <FeedsWidget4 className='mb-5 mb-xxl-8' />
-
-          <FeedsWidget5 className='mb-5 mb-xxl-8' />
-
-          <FeedsWidget6 className='mb-5 mb-xxl-8' />
-        </div>
-
-        <div className='col-xl-6'>
-          <ChartsWidget1 className='mb-5 mb-xxl-8' />
-
-          <ListsWidget5 className='mb-5 mb-xxl-8' />
-
-          <ListsWidget2 className='mb-5 mb-xxl-8' />
+      <div className="row g-5 g-xxl-8">
+        <div className="col-xl-12">
+          <TablesWidget9
+            className="mb-5 mb-xl-8"
+            transactions={transactions}
+            setTransactions={setTransactions}
+            setTransactionOpen={setTransactionOpen}
+          />
         </div>
       </div>
+      {transactionOpen && (
+        <TransactionForm
+          setTransactionOpen={setTransactionOpen}
+          setTransactions={setTransactions}
+          transactions={transactions}
+          transactionOpen={transactionOpen}
+        />
+      )}
     </Content>
-  )
+  );
 }

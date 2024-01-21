@@ -41,13 +41,19 @@ export function Login() {
       setLoading(true);
       try {
         const { data: auth } = await login(values.email, values.password);
-        saveAuth(auth.data);
-        // const {data: user} = await getUserByToken(auth.api_token)
-        setCurrentUser(auth.data);
-      } catch (error) {
+        if (auth.success) {
+          saveAuth(auth.data);
+          // const {data: user} = await getUserByToken(auth.api_token)
+          setCurrentUser(auth.data);
+        } else {
+          console.error(auth);
+          saveAuth(undefined);
+          setStatus(auth?.message || "The login details are incorrect");
+        }
+      } catch (error: any) {
         console.error(error);
         saveAuth(undefined);
-        setStatus("The login details are incorrect");
+        setStatus(error?.message || "The login details are incorrect");
         setSubmitting(false);
         setLoading(false);
       }
@@ -64,9 +70,7 @@ export function Login() {
       {/* begin::Heading */}
       <div className="text-center mb-11">
         <h1 className="text-gray-900 fw-bolder mb-3">Sign In</h1>
-        <div className="text-gray-500 fw-semibold fs-6">
-          Your Social Campaigns
-        </div>
+        <div className="text-gray-500 fw-semibold fs-6"></div>
       </div>
       {/* begin::Heading */}
 
@@ -123,16 +127,9 @@ export function Login() {
       </div>
       {/* end::Separator */}
 
-      {formik.status ? (
+      {formik.status && (
         <div className="mb-lg-15 alert alert-danger">
           <div className="alert-text font-weight-bold">{formik.status}</div>
-        </div>
-      ) : (
-        <div className="mb-10 bg-light-info p-8 rounded">
-          <div className="text-info">
-            Use account <strong>admin@demo.com</strong> and password{" "}
-            <strong>demo</strong> to continue.
-          </div>
         </div>
       )}
 
