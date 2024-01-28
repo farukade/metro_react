@@ -3,6 +3,7 @@ import { Content } from "../../../../_metronic/layout/components/content";
 import { TransactionForm } from "../../../../_metronic/partials/modals/transaction/TransactionForm";
 import { TablesWidget9 } from "../../../../_metronic/partials/widgets";
 import { TransactionModel } from "../../auth/core/_models";
+import { UpdateItem } from "../../../../_metronic/partials/modals/itemUpdate/ItemUpdate";
 
 export function Overview() {
   const [transactionOpen, setTransactionOpen] = useState(false);

@@ -14,6 +14,7 @@ export const LOGIN_URL = `${API_URL}/user/login`;
 export const REGISTER_URL = `${API_URL}/user/register`;
 export const REQUEST_PASSWORD_URL = `${API_URL}/forgot_password`;
 export const TRANSACTION_URL = `${API_URL}/transaction`;
+export const USER_URL = `${API_URL}/user`;
 
 // Server should return AuthModel
 export function login(email: string, password: string) {
@@ -29,6 +30,15 @@ export function postTransaction(
   user: UserModel | undefined
 ) {
   return axios.post<TransactionResponse>(TRANSACTION_URL, data, {
+    headers: {
+      Authorization: `Bearer ${user?.token}`,
+      Accept: "application/json",
+    },
+  });
+}
+
+export function updateUserItem(data: any, user: UserModel | undefined) {
+  return axios.put<LoginResponse>(`${USER_URL}/${user?.id}`, data, {
     headers: {
       Authorization: `Bearer ${user?.token}`,
       Accept: "application/json",

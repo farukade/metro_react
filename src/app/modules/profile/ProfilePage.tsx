@@ -1,11 +1,9 @@
 import { Navigate, Routes, Route, Outlet } from "react-router-dom";
 import { PageLink, PageTitle } from "../../../_metronic/layout/core";
 import { Overview } from "./components/Overview";
-import { Projects } from "./components/Projects";
-import { Campaigns } from "./components/Campaigns";
-import { Documents } from "./components/Documents";
-import { Connections } from "./components/Connections";
 import { ProfileHeader } from "./ProfileHeader";
+import { useState } from "react";
+import { UpdateItem } from "../../../_metronic/partials/modals/itemUpdate/ItemUpdate";
 
 const profileBreadCrumbs: Array<PageLink> = [
   {
@@ -16,26 +14,54 @@ const profileBreadCrumbs: Array<PageLink> = [
   },
 ];
 
-const ProfilePage = () => (
-  <Routes>
-    <Route
-      element={
-        <>
-          <ProfileHeader />
-          <Outlet />
-        </>
-      }
-    >
+const ProfilePage = () => {
+  const [updateItemOpen, setUpdateItemOpen] = useState(false);
+  const [itemName, setItemName] = useState("");
+  const [itemValue, setItemValue] = useState(0);
+  return (
+    <Routes>
       <Route
-        path="overview"
         element={
           <>
-            <PageTitle breadcrumbs={profileBreadCrumbs}></PageTitle>
-            <Overview />
+            <ProfileHeader
+              setUpdateItemOpen={setUpdateItemOpen}
+              setItemName={setItemName}
+              setItemValue={setItemValue}
+            />
+            <Outlet />
+            {updateItemOpen && (
+              <UpdateItem
+                setUpdateItemOpen={setUpdateItemOpen}
+                updateItemOpen={updateItemOpen}
+                itemName={itemName}
+                setItemName={setItemName}
+                itemValue={itemValue}
+                setItemValue={setItemValue}
+              />
+            )}
           </>
         }
-      />
-      {/* <Route
+      >
+        <Route
+          path="overview"
+          element={
+            <>
+              <PageTitle breadcrumbs={profileBreadCrumbs}></PageTitle>
+              <Overview />
+              {updateItemOpen && (
+                <UpdateItem
+                  setUpdateItemOpen={setUpdateItemOpen}
+                  updateItemOpen={updateItemOpen}
+                  itemName={itemName}
+                  setItemName={setItemName}
+                  itemValue={itemValue}
+                  setItemValue={setItemValue}
+                />
+              )}
+            </>
+          }
+        />
+        {/* <Route
         path='projects'
         element={
           <>
@@ -71,12 +97,13 @@ const ProfilePage = () => (
           </>
         }
       /> */}
-      <Route
-        index
-        element={<Navigate to="/crafted/pages/profile/overview" />}
-      />
-    </Route>
-  </Routes>
-);
+        <Route
+          index
+          element={<Navigate to="/crafted/pages/profile/overview" />}
+        />
+      </Route>
+    </Routes>
+  );
+};
 
 export default ProfilePage;

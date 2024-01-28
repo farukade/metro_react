@@ -1,17 +1,21 @@
-import { FC, useEffect, useState } from "react";
-import {
-  KTIcon,
-  formatCurrency,
-  getAvatar,
-  months,
-} from "../../../_metronic/helpers";
-import { Link, useLocation } from "react-router-dom";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import { KTIcon, formatCurrency, getAvatar } from "../../../_metronic/helpers";
 import { ToolbarWrapper } from "../../../_metronic/layout/components/toolbar";
 import { Content } from "../../../_metronic/layout/components/content";
 import { useAuth } from "../auth";
-import { startCase, toUpper } from "lodash";
+import { startCase } from "lodash";
 
-const ProfileHeader: FC = () => {
+type Props = {
+  setUpdateItemOpen: Dispatch<SetStateAction<boolean>>;
+  setItemName: Dispatch<SetStateAction<string>>;
+  setItemValue: Dispatch<SetStateAction<number>>;
+};
+
+const ProfileHeader: FC<Props> = ({
+  setUpdateItemOpen,
+  setItemName,
+  setItemValue,
+}) => {
   const { currentUser } = useAuth();
   const [unitBalance, setUnitBalance] = useState(0);
   const [totalUsed, setTotalUsed] = useState(0);
@@ -92,17 +96,23 @@ const ProfileHeader: FC = () => {
                       </a>
                     </div>
                   </div>
-
-                  <div className="d-flex my-4"></div>
                 </div>
 
                 <div className="d-flex flex-wrap flex-stack">
                   <div className="d-flex flex-column flex-grow-1 pe-8">
                     <div className="d-flex flex-wrap">
-                      <div className="border border-gray-300 border-dashed rounded min-w-115px py-3 px-4 me-6 mb-3">
+                      <div
+                        className="border cursor-pointer border-gray-300 border-dashed rounded min-w-115px py-3 px-4 me-6 mb-3"
+                        onClick={() => {
+                          if (currentUser?.type === "admin") {
+                            setUpdateItemOpen(true);
+                            setItemName("unitBalance");
+                            setItemValue(unitBalance);
+                          }
+                        }}
+                      >
                         <div className="d-flex align-items-center">
-                          {currentUser?.unitBalance &&
-                          currentUser.unitBalance > 100 ? (
+                          {unitBalance && unitBalance > 100 ? (
                             <KTIcon
                               iconName="arrow-up"
                               className="fs-3 text-success me-2"
@@ -113,9 +123,7 @@ const ProfileHeader: FC = () => {
                               className="fs-3 text-danger me-2"
                             />
                           )}
-                          <div className="fs-2 fw-bolder">
-                            {currentUser?.unitBalance || 0}
-                          </div>
+                          <div className="fs-2 fw-bolder">{unitBalance}</div>
                         </div>
 
                         <div className="fw-bold fs-6 text-gray-500">
@@ -123,10 +131,18 @@ const ProfileHeader: FC = () => {
                         </div>
                       </div>
 
-                      <div className="border border-gray-300 border-dashed rounded min-w-115px py-3 px-4 me-6 mb-3">
+                      <div
+                        className="border cursor-pointer border-gray-300 border-dashed rounded min-w-115px py-3 px-4 me-6 mb-3"
+                        onClick={() => {
+                          if (currentUser?.type === "admin") {
+                            setUpdateItemOpen(true);
+                            setItemName("totalUsed");
+                            setItemValue(totalUsed);
+                          }
+                        }}
+                      >
                         <div className="d-flex align-items-center">
-                          {currentUser?.difference &&
-                          currentUser.difference > 0 ? (
+                          {totalUsed && totalUsed > 0 ? (
                             <KTIcon
                               iconName="arrow-up"
                               className="fs-3 text-success me-2"
@@ -137,9 +153,7 @@ const ProfileHeader: FC = () => {
                               className="fs-3 text-danger me-2"
                             />
                           )}
-                          <div className="fs-2 fw-bolder">
-                            {currentUser?.difference || 0}
-                          </div>
+                          <div className="fs-2 fw-bolder">{totalUsed}</div>
                         </div>
 
                         <div className="fw-bold fs-6 text-gray-500">
@@ -147,10 +161,18 @@ const ProfileHeader: FC = () => {
                         </div>
                       </div>
 
-                      <div className="border border-gray-300 border-dashed rounded min-w-115px py-3 px-4 me-6 mb-3">
+                      <div
+                        className="cursor-pointer border border-gray-300 border-dashed rounded min-w-115px py-3 px-4 me-6 mb-3"
+                        onClick={() => {
+                          if (currentUser?.type === "admin") {
+                            setUpdateItemOpen(true);
+                            setItemName("total");
+                            setItemValue(total);
+                          }
+                        }}
+                      >
                         <div className="d-flex align-items-center">
-                          {currentUser?.difference &&
-                          currentUser.difference > 0 ? (
+                          {total && total > 0 ? (
                             <KTIcon
                               iconName="arrow-up"
                               className="fs-3 text-success me-2"
@@ -161,9 +183,7 @@ const ProfileHeader: FC = () => {
                               className="fs-3 text-danger me-2"
                             />
                           )}
-                          <div className="fs-2 fw-bolder">
-                            {currentUser?.difference || 0}
-                          </div>
+                          <div className="fs-2 fw-bolder">{total}</div>
                         </div>
 
                         <div className="fw-bold fs-6 text-gray-500">Total</div>
@@ -176,7 +196,7 @@ const ProfileHeader: FC = () => {
                             className="fs-3 text-success me-2"
                           />
                           <div className="fs-2 fw-bolder">
-                            {formatCurrency(currentUser?.totalSpent || 0)}
+                            {formatCurrency(amountSpent)}
                           </div>
                         </div>
 
