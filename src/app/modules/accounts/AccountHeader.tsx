@@ -20,7 +20,7 @@ const AccountHeader: FC = () => {
                 <div className="symbol symbol-100px symbol-lg-160px symbol-fixed position-relative">
                   <img
                     src={toAbsoluteUrl("/media/avatars/300-1.jpg")}
-                    alt="Metronic"
+                    alt="Wareeba"
                   />
                   <div className="position-absolute translate-middle bottom-0 start-100 mb-6 bg-success rounded-circle border border-4 border-white h-20px w-20px"></div>
                 </div>

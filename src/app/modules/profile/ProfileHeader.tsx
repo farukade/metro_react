@@ -142,7 +142,7 @@ const ProfileHeader: FC<Props> = ({
                         }}
                       >
                         <div className="d-flex align-items-center">
-                          {totalUsed && totalUsed > 0 ? (
+                          {totalUsed && totalUsed > 200 ? (
                             <KTIcon
                               iconName="arrow-up"
                               className="fs-3 text-success me-2"

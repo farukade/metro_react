@@ -24,11 +24,19 @@ const UpdateItem = (props: {
       setSubmitting(true);
       setStatus("");
       const data = { [itemName]: newValue };
-      console.log("DATA => ", data);
       const { data: rs } = await updateUserItem(data, currentUser);
 
       if (rs?.success) {
-        setCurrentUser(rs.data);
+        if (currentUser) {
+          setCurrentUser({
+            ...currentUser,
+            ...rs.data,
+          });
+        } else {
+          setCurrentUser({
+            ...rs.data,
+          });
+        }
         setTimeout(() => {
           setUpdateItemOpen(false);
         }, 300);
