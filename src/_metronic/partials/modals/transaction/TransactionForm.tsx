@@ -1,7 +1,8 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, CSSProperties, useState } from "react";
 import { KTIcon } from "../../../helpers";
 import { postTransaction } from "../../../../app/modules/auth/core/_requests";
 import { TransactionModel, useAuth } from "../../../../app/modules/auth";
+import DatePicker from "react-datepicker";
 
 const TransactionForm = (props: {
   setTransactionOpen: Dispatch<SetStateAction<boolean>>;
@@ -13,11 +14,12 @@ const TransactionForm = (props: {
     props;
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState<Date | null>(new Date());
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState(0);
   const [unitValue, setUnitValue] = useState(0);
   const [mode, setMode] = useState("");
+  const [time, setTime] = useState<Date | null>(new Date());
 
   const { currentUser } = useAuth();
 
@@ -32,7 +34,7 @@ const TransactionForm = (props: {
         return;
       }
       if (!amount) {
-        setStatus("Please add description!");
+        setStatus("Please add a valid amount!");
         return;
       }
       if (!mode) {
@@ -40,16 +42,21 @@ const TransactionForm = (props: {
         return;
       }
       if (!unitValue) {
-        setStatus("Please add quantity of units!");
+        setStatus("Please add a valid quantity of units!");
         return;
       }
 
       setSubmitting(true);
       setStatus("");
 
+      const datetime = new Date(
+        `${date.getFullYear()}-${
+          date.getMonth() + 1
+        }-${date.getDate()} ${time?.getHours()}:${time?.getMinutes()}`
+      );
       const { data: rs } = await postTransaction(
         {
-          date,
+          date: datetime,
           description,
           amount,
           mode,
@@ -125,15 +132,41 @@ const TransactionForm = (props: {
             <div className="mb-10">
               <div className="mh-300px me-n7 pe-7" style={{ fontSize: "15px" }}>
                 <div className="m-3 form-group d-flex justify-content-between align-items-center">
-                  <label>Date</label>
-                  <input
-                    className="form-control"
-                    type="date"
-                    onChange={(e) => {
-                      setDate(new Date(e.target?.value));
+                  <label>Date Time</label>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "end",
+                      width: "65%",
+                      marginBottom: "10px",
+                      justifyContent: "space-between",
                     }}
-                    style={{ width: "65%", marginBottom: "10px" }}
-                  />
+                  >
+                    <div style={{ width: "60%" }}>
+                      <DatePicker
+                        isClearable
+                        className="form-control single-daterange"
+                        dateFormat="dd-MMM-yyyy"
+                        selected={date}
+                        onChange={(e) => {
+                          setDate(e);
+                        }}
+                      />
+                    </div>
+                    <div style={{ width: "30%" }}>
+                      <DatePicker
+                        className="single-daterange form-control"
+                        showTimeSelectOnly
+                        showTimeSelect
+                        dropdownMode="select"
+                        dateFormat="HH:mm"
+                        selected={time}
+                        onChange={(e) => {
+                          setTime(e);
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="m-3 form-group d-flex justify-content-between align-items-center">
                   <label>Description</label>

@@ -15,7 +15,7 @@ const Footer = () => {
           target="_blank"
           className="text-gray-800 text-hover-primary"
         >
-          Wareeba
+          Wareeba Inc
         </a>
       </div>
 
