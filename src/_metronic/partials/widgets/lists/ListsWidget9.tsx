@@ -86,7 +86,7 @@ const ListsWidget9: React.FC<Props> = ({className}) => {
               <span className='text-gray-500 fw-bold fs-7'>
                 By:
                 <a href='#' className='text-primary fw-bold'>
-                  KeenThemes
+                  Wareeba
                 </a>
               </span>
             </div>

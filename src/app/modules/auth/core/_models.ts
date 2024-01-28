@@ -88,7 +88,7 @@ export interface UserModel {
   image?: string;
   language?: "en" | "de" | "es" | "fr" | "ja" | "zh" | "ru";
   timeZone?: string;
-  website?: "https://keenthemes.com";
+  website?: "https://wareeba.com";
   emailSettings?: UserEmailSettingsModel;
   auth?: AuthModel;
   communication?: UserCommunicationModel;
@@ -96,6 +96,9 @@ export interface UserModel {
   socialNetworks?: UserSocialNetworksModel;
   type: string;
   token: string;
+  totalUsed: number;
+  total: number;
+  amountSpent: number;
 }
 
 export interface TransactionModel {

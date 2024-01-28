@@ -14,12 +14,6 @@ const profileBreadCrumbs: Array<PageLink> = [
     isSeparator: false,
     isActive: false,
   },
-  {
-    title: "",
-    path: "",
-    isSeparator: true,
-    isActive: false,
-  },
 ];
 
 const ProfilePage = () => (
@@ -36,7 +30,7 @@ const ProfilePage = () => (
         path="overview"
         element={
           <>
-            <PageTitle breadcrumbs={profileBreadCrumbs}>Overview</PageTitle>
+            <PageTitle breadcrumbs={profileBreadCrumbs}></PageTitle>
             <Overview />
           </>
         }

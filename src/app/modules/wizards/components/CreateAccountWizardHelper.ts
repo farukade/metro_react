@@ -41,21 +41,21 @@ const createAccountSchemas = [
 ]
 
 const inits: ICreateAccount = {
-  accountType: 'personal',
-  accountTeamSize: '50+',
-  accountName: '',
-  accountPlan: '1',
-  businessName: 'Keenthemes Inc.',
-  businessDescriptor: 'KEENTHEMES',
-  businessType: '1',
-  businessDescription: '',
-  businessEmail: 'corp@support.com',
-  nameOnCard: 'Max Doe',
-  cardNumber: '4111 1111 1111 1111',
-  cardExpiryMonth: '1',
-  cardExpiryYear: '2025',
-  cardCvv: '123',
-  saveCard: '1',
-}
+  accountType: "personal",
+  accountTeamSize: "50+",
+  accountName: "",
+  accountPlan: "1",
+  businessName: "Wareeba Inc.",
+  businessDescriptor: "WAREEBA",
+  businessType: "1",
+  businessDescription: "",
+  businessEmail: "corp@support.com",
+  nameOnCard: "Max Doe",
+  cardNumber: "4111 1111 1111 1111",
+  cardExpiryMonth: "1",
+  cardExpiryYear: "2025",
+  cardCvv: "123",
+  saveCard: "1",
+};
 
 export {createAccountSchemas, inits}
