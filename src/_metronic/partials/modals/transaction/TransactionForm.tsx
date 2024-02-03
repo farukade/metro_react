@@ -22,6 +22,9 @@ const TransactionForm = (props: {
   } = props;
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState("");
+  const [hasTransaction, setHasTransaction] = useState<Boolean>(
+    transaction ? true : false
+  );
   const [date, setDate] = useState<Date | null>(
     transaction ? new Date(transaction.date) : new Date()
   );
@@ -195,6 +198,8 @@ const TransactionForm = (props: {
   };
 
   useEffect(() => {
+    setHasTransaction(transaction !== null);
+    console.log("hasTransaction ===> ", hasTransaction);
     return setTransaction(null);
   }, [transaction]);
 
@@ -232,7 +237,7 @@ const TransactionForm = (props: {
           <div className="modal-body mx-5 mx-xl-10 pt-0 pb-15">
             <div className="text-center mb-13">
               <h1 className="mb-3">
-                {transaction ? "Update Transaction" : "Add Transaction"}
+                {hasTransaction ? "Transaction" : "Transaction"}
               </h1>
             </div>
 
