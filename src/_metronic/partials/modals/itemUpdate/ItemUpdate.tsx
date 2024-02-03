@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { KTIcon } from "../../../helpers";
-import { updateUserItem } from "../../../../app/modules/auth/core/_requests";
+import { request } from "../../../../app/modules/auth/core/_requests";
 import { useAuth } from "../../../../app/modules/auth";
 import { startCase } from "lodash";
 
@@ -24,24 +24,30 @@ const UpdateItem = (props: {
       setSubmitting(true);
       setStatus("");
       const data = { [itemName]: newValue };
-      const { data: rs } = await updateUserItem(data, currentUser);
+      const url = `user/${currentUser?.id || "0"}`;
+      const { result, success, message } = await request(
+        url,
+        "PUT",
+        true,
+        data
+      );
 
-      if (rs?.success) {
+      if (success) {
         if (currentUser) {
           setCurrentUser({
             ...currentUser,
-            ...rs.data,
+            ...result,
           });
         } else {
           setCurrentUser({
-            ...rs.data,
+            ...result,
           });
         }
         setTimeout(() => {
           setUpdateItemOpen(false);
         }, 300);
       } else {
-        setStatus(rs.message || "Submission failed!");
+        setStatus(message || "Submission failed!");
         setSubmitting(false);
       }
     } catch (error: any) {

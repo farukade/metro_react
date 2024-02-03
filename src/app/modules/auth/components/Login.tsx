@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import clsx from "clsx";
 import { Link } from "react-router-dom";
 import { useFormik } from "formik";
-import { getUserByToken, login } from "../core/_requests";
+import { request } from "../core/_requests";
 import { toAbsoluteUrl } from "../../../../_metronic/helpers";
 import { useAuth } from "../core/Auth";
 
@@ -40,15 +40,23 @@ export function Login() {
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
       try {
-        const { data: auth } = await login(values.email, values.password);
-        if (auth.success) {
-          saveAuth(auth.data);
-          // const {data: user} = await getUserByToken(auth.api_token)
-          setCurrentUser(auth.data);
+        const data = {
+          email: values.email,
+          password: values.password,
+        };
+        const url = `user/login`;
+        const { success, message, result } = await request(
+          url,
+          "POST",
+          false,
+          data
+        );
+        if (success) {
+          saveAuth({ ...result, api_token: result.token });
+          setCurrentUser(result);
         } else {
-          console.error(auth);
           saveAuth(undefined);
-          setStatus(auth?.message || "The login details are incorrect");
+          setStatus(message || "The login details are incorrect");
         }
       } catch (error: any) {
         console.error(error);

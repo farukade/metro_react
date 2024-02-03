@@ -5,12 +5,7 @@ import { RightToolbar } from "../partials/layout/RightToolbar";
 import { ScrollTop } from "./components/scroll-top";
 import { FooterWrapper } from "./components/footer";
 import { Sidebar } from "./components/sidebar";
-import {
-  ActivityDrawer,
-  DrawerMessenger,
-  TransactionForm,
-  UpgradePlan,
-} from "../partials";
+import { ActivityDrawer, DrawerMessenger, UpgradePlan } from "../partials";
 import { PageDataProvider } from "./core";
 import { reInitMenu } from "../helpers";
 

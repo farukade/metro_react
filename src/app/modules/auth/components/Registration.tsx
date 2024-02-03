@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import clsx from "clsx";
-import { getUserByToken, register } from "../core/_requests";
+import { request } from "../core/_requests";
 import { Link } from "react-router-dom";
 import { toAbsoluteUrl } from "../../../../_metronic/helpers";
 import { PasswordMeterComponent } from "../../../../_metronic/assets/ts/components";
@@ -52,21 +52,25 @@ export function Registration() {
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
       try {
-        const { data: auth } = await register(
-          values.email,
-          values.firstname,
-          values.lastname,
-          values.password,
-          values.changepassword
+        const data = {
+          email: values.email,
+          firstName: values.firstname,
+          lastName: values.lastname,
+          password: values.password,
+        };
+        const url = `user/register`;
+        const { result, message, success } = await request(
+          url,
+          "POST",
+          false,
+          data
         );
-        if (auth?.success) {
-          saveAuth(auth.data);
-          // const { data: user } = await getUserByToken(auth.api_token);
-          setCurrentUser(auth.data);
+        if (success) {
+          saveAuth(result);
+          setCurrentUser(result);
         } else {
-          console.error(auth);
           saveAuth(undefined);
-          setStatus(auth.message || "The registration details is incorrect");
+          setStatus(message || "The registration details is incorrect");
         }
       } catch (error: any) {
         console.error(error);

@@ -3,18 +3,18 @@ export interface LoginResponse {
   message: string;
   data: UserModel & AuthModel;
 }
-export interface TransactionsResponse {
+export interface ServerResponse {
   success: boolean;
-  message: string;
-  data: {
-    result: TransactionModel[];
-    totalSpent: number;
-    totalSpentPrevious: number;
-    transactionCount: number;
-    transactionCountPrevious: number;
-    percentageDifference: number;
-    difference: number;
-  };
+  message?: string;
+  result?: any;
+  paging?: Paging;
+}
+
+export interface Paging {
+  currentPage: number;
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
 }
 
 export interface TransactionResponse {

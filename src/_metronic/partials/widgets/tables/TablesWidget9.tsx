@@ -7,16 +7,14 @@ import React, {
 } from "react";
 import { KTIcon, formatCurrency } from "../../../helpers";
 import { TransactionModel, useAuth } from "../../../../app/modules/auth";
-import {
-  removeTransaction,
-  fetchTransaction,
-} from "../../../../app/modules/auth/core/_requests";
+import { request } from "../../../../app/modules/auth/core/_requests";
 import moment from "moment";
 
 type Props = {
   className: string;
   transactions: TransactionModel[];
   setTransactions: Dispatch<SetStateAction<TransactionModel[]>>;
+  setTransaction: Dispatch<SetStateAction<TransactionModel | null>>;
   setTransactionOpen: Dispatch<SetStateAction<boolean>>;
 };
 
@@ -25,25 +23,33 @@ const TablesWidget9: React.FC<Props> = ({
   setTransactionOpen,
   transactions,
   setTransactions,
+  setTransaction,
 }) => {
   const { currentUser, setCurrentUser } = useAuth();
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [limit] = useState(10);
 
   const getTransactions = useCallback(async () => {
     try {
       document.body.classList.add("page-loading");
 
-      const { data: rs } = await fetchTransaction(currentUser, { page, limit });
-      if (rs?.success) {
+      const url = `transaction?page=${page || 1}&limit=${limit || 10}`;
+      const {
+        success,
+        message,
+        paging,
+        result: rs,
+      } = await request(url, "GET", true, null);
+      if (success) {
+        const { result, ...rest } = rs;
         document.body.classList.remove("page-loading");
-        const { result, ...rest } = rs.data;
         setTransactions(result);
         if (currentUser) {
           setCurrentUser({ ...currentUser, ...rest });
         }
       } else {
         document.body.classList.remove("page-loading");
+        console.log(message || "Error fetching transactions!");
       }
     } catch (error: any) {
       document.body.classList.remove("page-loading");
@@ -58,8 +64,10 @@ const TablesWidget9: React.FC<Props> = ({
       if (!item.id) {
         return;
       }
-      const { data: rs } = await removeTransaction(currentUser, item.id);
-      if (rs?.success) {
+
+      const url = `transaction?id=${item.id}`;
+      const { success, message } = await request(url, "DELETE", true, null);
+      if (success) {
         document.body.classList.remove("page-loading");
         let newData: any = [];
         for (const transaction of transactions) {
@@ -70,6 +78,7 @@ const TablesWidget9: React.FC<Props> = ({
         setTransactions(newData);
       } else {
         document.body.classList.remove("page-loading");
+        console.log(message || "Error deleting transaction");
       }
     } catch (error: any) {
       document.body.classList.remove("page-loading");
@@ -189,6 +198,16 @@ const TablesWidget9: React.FC<Props> = ({
                             }}
                           >
                             <KTIcon iconName="trash" className="fs-3" />
+                          </a>
+                          <a
+                            href="#"
+                            className="btn btn-icon btn-bg-light btn-active-color-primary btn-sm"
+                            onClick={() => {
+                              setTransaction(transaction);
+                              setTransactionOpen(true);
+                            }}
+                          >
+                            <KTIcon iconName="pencil" className="fs-3" />
                           </a>
                         </div>
                       </td>

@@ -1,25 +1,43 @@
-import { Dispatch, SetStateAction, CSSProperties, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { KTIcon } from "../../../helpers";
-import { postTransaction } from "../../../../app/modules/auth/core/_requests";
+import { request } from "../../../../app/modules/auth/core/_requests";
 import { TransactionModel, useAuth } from "../../../../app/modules/auth";
 import DatePicker from "react-datepicker";
 
 const TransactionForm = (props: {
   setTransactionOpen: Dispatch<SetStateAction<boolean>>;
   setTransactions: Dispatch<SetStateAction<TransactionModel[]>>;
+  setTransaction: Dispatch<SetStateAction<TransactionModel | null>>;
   transactions: TransactionModel[];
+  transaction: TransactionModel | null;
   transactionOpen: boolean;
 }) => {
-  const { setTransactionOpen, transactionOpen, setTransactions, transactions } =
-    props;
+  const {
+    setTransactionOpen,
+    transactionOpen,
+    transaction,
+    setTransactions,
+    setTransaction,
+    transactions,
+  } = props;
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState("");
-  const [date, setDate] = useState<Date | null>(new Date());
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState(0);
-  const [unitValue, setUnitValue] = useState(0);
-  const [mode, setMode] = useState("");
-  const [time, setTime] = useState<Date | null>(new Date());
+  const [date, setDate] = useState<Date | null>(
+    transaction ? new Date(transaction.date) : new Date()
+  );
+  const [description, setDescription] = useState(
+    transaction ? transaction.description : ""
+  );
+  const [amount, setAmount] = useState<number | string>(
+    transaction ? transaction.amount : ""
+  );
+  const [unitValue, setUnitValue] = useState<number | string>(
+    transaction ? transaction.unitValue : ""
+  );
+  const [mode, setMode] = useState(transaction ? transaction.mode : "");
+  const [time, setTime] = useState<Date | null>(
+    transaction ? new Date(transaction.date) : new Date()
+  );
 
   const { currentUser } = useAuth();
 
@@ -33,7 +51,7 @@ const TransactionForm = (props: {
         setStatus("Please add description!");
         return;
       }
-      if (!amount) {
+      if (!Number(amount)) {
         setStatus("Please add a valid amount!");
         return;
       }
@@ -41,7 +59,7 @@ const TransactionForm = (props: {
         setStatus("Please add mode of payment!");
         return;
       }
-      if (!unitValue) {
+      if (!Number(unitValue)) {
         setStatus("Please add a valid quantity of units!");
         return;
       }
@@ -54,30 +72,35 @@ const TransactionForm = (props: {
           date.getMonth() + 1
         }-${date.getDate()} ${time?.getHours()}:${time?.getMinutes()}`
       );
-      const { data: rs } = await postTransaction(
-        {
-          date: datetime,
-          description,
-          amount,
-          mode,
-          unitValue,
-        },
-        currentUser
+
+      const data = {
+        date: datetime,
+        description,
+        amount: Number(amount),
+        mode,
+        unitValue: Number(unitValue),
+      };
+      const url = `transaction`;
+      const { result, message, success } = await request(
+        url,
+        "POST",
+        true,
+        data
       );
 
-      if (rs?.success) {
+      if (success) {
         setDate(new Date());
         setDescription("");
         setAmount(0);
         setUnitValue(0);
         setMode("");
         setSubmitting(false);
-        setTransactions([rs.data, ...transactions]);
+        setTransactions([result, ...transactions]);
         setTimeout(() => {
           setTransactionOpen(false);
         }, 300);
       } else {
-        setStatus(rs.message || "Submission failed!");
+        setStatus(message || "Submission failed!");
         setSubmitting(false);
       }
     } catch (error: any) {
@@ -86,6 +109,94 @@ const TransactionForm = (props: {
       console.log(error);
     }
   };
+
+  const updateTransaction = async () => {
+    try {
+      document.body.classList.add("page-loading");
+      if (!date) {
+        setStatus("Please select date!");
+        return;
+      }
+      if (!description) {
+        setStatus("Please add description!");
+        return;
+      }
+      if (!Number(amount)) {
+        setStatus("Please add a valid amount!");
+        return;
+      }
+      if (!mode) {
+        setStatus("Please add mode of payment!");
+        return;
+      }
+      if (!Number(unitValue)) {
+        setStatus("Please add a valid quantity of units!");
+        return;
+      }
+      if (!transaction) {
+        setStatus("Transaction id not detected!");
+        return;
+      }
+      if (!currentUser || !currentUser.token) {
+        setStatus("User credentials not found, Please refresh and try again");
+        return;
+      }
+
+      setSubmitting(true);
+      setStatus("");
+
+      const datetime = new Date(
+        `${date.getFullYear()}-${
+          date.getMonth() + 1
+        }-${date.getDate()} ${time?.getHours()}:${time?.getMinutes()}`
+      );
+
+      const data = {
+        date: datetime,
+        description,
+        amount: Number(amount),
+        mode,
+        unitValue: Number(unitValue),
+      };
+
+      const url = `transaction?id=${transaction.id}`;
+      const { result, success, message } = await request(
+        url,
+        "PUT",
+        true,
+        data
+      );
+
+      if (success) {
+        document.body.classList.remove("page-loading");
+        let newData: any = [];
+        for (const item of transactions) {
+          if (item.id === result.id) {
+            newData = [...newData, result];
+          } else {
+            newData = [...newData, transaction];
+          }
+        }
+        setTransactions(newData);
+        setTimeout(() => {
+          setTransactionOpen(false);
+        }, 300);
+      } else {
+        setStatus(message || "Unexpected error!");
+      }
+      document.body.classList.remove("page-loading");
+      setSubmitting(false);
+    } catch (error: any) {
+      document.body.classList.remove("page-loading");
+      console.log("ERROR => ", error);
+      setStatus(error.message || "Unexpected error!");
+      setSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    return setTransaction(null);
+  }, [transaction]);
 
   return (
     <div
@@ -120,7 +231,9 @@ const TransactionForm = (props: {
 
           <div className="modal-body mx-5 mx-xl-10 pt-0 pb-15">
             <div className="text-center mb-13">
-              <h1 className="mb-3">Add Transaction</h1>
+              <h1 className="mb-3">
+                {transaction ? "Update Transaction" : "Add Transaction"}
+              </h1>
             </div>
 
             {status && (
@@ -190,9 +303,11 @@ const TransactionForm = (props: {
                   <input
                     className="form-control"
                     type="number"
-                    defaultValue={""}
+                    value={amount}
                     onChange={(e) => {
-                      setAmount(Number(e.target?.value));
+                      if (Number(e.target.value)) {
+                        setAmount(Number(e.target?.value));
+                      }
                     }}
                     style={{ width: "65%", marginBottom: "10px" }}
                   />
@@ -214,9 +329,11 @@ const TransactionForm = (props: {
                   <input
                     className="form-control"
                     type="number"
-                    defaultValue={""}
+                    value={unitValue}
                     onChange={(e) => {
-                      setUnitValue(Number(e.target?.value));
+                      if (Number(e.target.value)) {
+                        setUnitValue(Number(e.target?.value));
+                      }
                     }}
                     style={{ width: "65%", marginBottom: "10px" }}
                   />
@@ -234,6 +351,17 @@ const TransactionForm = (props: {
                   Please wait...
                   <span className="spinner-border spinner-border-sm align-middle ms-2"></span>
                 </span>
+              ) : transaction ? (
+                <a
+                  href="#"
+                  className="btn btn-sm btn-primary"
+                  onClick={() => {
+                    updateTransaction();
+                  }}
+                >
+                  <KTIcon iconName="document" className="fs-3" />
+                  Update
+                </a>
               ) : (
                 <a
                   href="#"
