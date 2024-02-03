@@ -37,7 +37,7 @@ const DashboardPage: FC = () => {
           case 1:
             value = currentUser.openingBalance;
             break;
-          case 1:
+          case 2:
             value = currentUser.openingBalance - currentUser.unitBalance;
             break;
         }
