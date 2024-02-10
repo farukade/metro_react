@@ -9,6 +9,10 @@ export function MenuInner() {
         title={intl.formatMessage({ id: "MENU.DASHBOARD" })}
         to="/crafted/pages/profile/overview"
       />
+      <MenuItem
+        title={intl.formatMessage({ id: "MENU.CONTACTS" })}
+        to="/crafted/account/overview"
+      />
     </>
   );
 }

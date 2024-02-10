@@ -1,5 +1,5 @@
 import { ServerResponse, UserModel } from "./_models";
-import { getCurrentUser, useAuth } from "..";
+import axios from "axios";
 
 const API_URL = import.meta.env.VITE_APP_API_URL;
 
@@ -121,6 +121,22 @@ export const defaultUploadHeaders = {
 
 const parseJSON = (response: any) => response.json();
 
+export const uploadRequest = async (url: string, method: string, body: any) => {
+  let token = window ? localStorage.getItem("access_token") : "";
+
+  if (!token) {
+    token = "";
+  }
+
+  const jwt = `Bearer ${token}`;
+  let headers = { ...defaultUploadHeaders, Authorization: jwt };
+  const response = await axios.post(`${API_URL}/${url}`, body, { headers });
+  // await fetch(`${API_URL}/${url}`, { method, headers, body });
+  // const result = await checkStatus(response);
+  // return parseJSON(result);
+  return response;
+};
+
 export const request = async (
   url: string,
   method: string,
@@ -169,3 +185,16 @@ const checkStatus = async (response: any) => {
 
   return response;
 };
+
+export const getRandomNumber = (min: number, max: number) => {
+  return Number((Math.random() * (max - min) + min).toFixed(0));
+};
+
+export const bootstrapColors = [
+  "success",
+  "danger",
+  "primary",
+  "info",
+  "warning",
+  "dark",
+];
