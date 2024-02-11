@@ -10,6 +10,7 @@ import {
 import { ConfirmationType } from "../../../../_metronic/layout/core";
 import ConfirmationModal from "../../../../_metronic/partials/modals/confirmation/Confirmation";
 import { KTIcon } from "../../../../_metronic/helpers";
+import Select from "react-select";
 
 const API_URL = import.meta.env.VITE_APP_API_URL;
 
@@ -38,6 +39,7 @@ const defaultNewContact = {
 export function Overview() {
   const [contactGroups, setContactGroups] = useState<any>([]);
   const [group, setGroup] = useState<any>(null);
+  const [selectedGroups, setSelectedGroups] = useState<any>([]);
   const [newGroup, setNewGroup] = useState<string>("");
   const [contacts, setContacts] = useState<any>([]);
   const [contact, setContact] = useState<any>(null);
@@ -164,6 +166,10 @@ export function Overview() {
         setContactError("Phone name is required!");
         return;
       }
+      if (!selectedGroups.length) {
+        setContactError("At least one group (All contacts) is required!");
+        return;
+      }
       setContactError("");
       const datum = editing
         ? {
@@ -174,6 +180,7 @@ export function Overview() {
             description,
             emailTwo,
             phoneTwo,
+            groups: selectedGroups.map((g: any) => g.id),
           }
         : {
             name: `${firstName} ${lastName}`,
@@ -183,6 +190,7 @@ export function Overview() {
             description: description || null,
             emailTwo: emailTwo || null,
             phoneTwo: phoneTwo || null,
+            groups: selectedGroups.map((g: any) => g.id),
           };
       const rs = await request(url, method, true, datum);
       if (rs.success) {
@@ -200,6 +208,7 @@ export function Overview() {
         setContactError("");
         setGroupError("");
         setEditing(false);
+        getGroups();
       } else {
         setContactError(rs.message || "Error saving group!");
       }
@@ -604,7 +613,7 @@ export function Overview() {
                       <img src={`${API_URL}/${contact.image}`} alt="image" />
                     ) : (
                       <span
-                        className={`symbol-label  bg-light-dark text-dark fw-bolder`}
+                        className={`symbol-label  bg-light-primary text-primary fw-bolder`}
                         style={{ fontSize: "30px" }}
                       >
                         {getNameAbbr(contact.name)}
@@ -876,6 +885,81 @@ export function Overview() {
                         </span>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="fv-row mb-7">
+                    <label className="fs-6 fw-semibold form-label mt-3">
+                      <span className="required">Groups</span>
+
+                      <span
+                        className="ms-1"
+                        data-bs-toggle="tooltip"
+                        aria-label="Enter the contact's email."
+                        data-bs-original-title="Enter the contact's email."
+                        data-kt-initialized="1"
+                      >
+                        <i className="ki-duotone ki-information fs-7">
+                          <span className="path1"></span>
+                          <span className="path2"></span>
+                          <span className="path3"></span>
+                        </i>{" "}
+                      </span>
+                    </label>
+
+                    {/* <input
+                      type="text"
+                      className="form-control form-control-solid"
+                      name="firstName"
+                      value={contactData.firstName}
+                      onChange={(e) => {
+                        setContactData({
+                          ...contactData,
+                          firstName: e.target.value,
+                        });
+                      }}
+                    /> */}
+
+                    <Select
+                      isMulti
+                      isClearable
+                      className="form-control form-control-solid"
+                      getOptionValue={(option: any) => option.id}
+                      getOptionLabel={(option: any) => `${option.name}`}
+                      options={contactGroups}
+                      value={
+                        !selectedGroups.length
+                          ? [
+                              contactGroups?.find(
+                                (g: any) =>
+                                  g.name?.toLowerCase() === "all contacts"
+                              ),
+                            ]
+                          : selectedGroups
+                      }
+                      name="groups"
+                      id="groups"
+                      isOptionDisabled={(option) =>
+                        option.name?.toLowerCase() === "all contacts"
+                      }
+                      onChange={(e: any) => {
+                        // if (e.name?.toLowerCase() !== "all contacts") {
+                        const defaultGroup = contactGroups?.find(
+                          (g: any) => g.name?.toLowerCase() === "all contacts"
+                        );
+                        const checkDefaultGroup = e?.find(
+                          (g: any) => g.name?.toLowerCase() === "all contacts"
+                        );
+                        if (checkDefaultGroup) {
+                          setSelectedGroups(e);
+                        } else {
+                          setSelectedGroups([defaultGroup, ...e]);
+                        }
+                        // }
+                      }}
+                      placeholder="Select Users"
+                    />
+
+                    <div className="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div>
                   </div>
 
                   <div className="row row-cols-1 row-cols-sm-2 rol-cols-md-1 row-cols-lg-2">
