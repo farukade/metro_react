@@ -245,6 +245,24 @@ export function Overview() {
     }
   };
 
+  const getFirstNameLastName = (item: any) => {
+    const nameArr = item.name?.split(" ");
+    let firstName: string = "";
+    let lastName: string = "";
+    let i = 0;
+    for (const item of nameArr) {
+      if (i > 1) {
+        lastName += ` ${item}`;
+      } else if (i === 1) {
+        lastName += `${item}`;
+      } else {
+        firstName += item;
+      }
+      i++;
+    }
+    return { firstName, lastName };
+  };
+
   useEffect(() => {
     getGroups();
     getContacts();
@@ -339,6 +357,10 @@ export function Overview() {
               <a
                 onClick={() => {
                   setContactOpen(false);
+                  setContactData({
+                    ...defaultNewContact,
+                  });
+                  setEditing(false);
                 }}
                 className="btn btn-primary w-100"
               >
@@ -462,6 +484,10 @@ export function Overview() {
                                 setContact(c);
                                 setEditing(true);
                                 setContactOpen(false);
+                                setContactData({
+                                  ...c,
+                                  ...getFirstNameLastName(c),
+                                });
                               }}
                             >
                               <KTIcon iconName="pencil" className="fs-3" />
@@ -538,24 +564,9 @@ export function Overview() {
                     <div className="menu-item px-3">
                       <a
                         onClick={() => {
-                          const nameArr = contact.name?.split(" ");
-                          let firstName: string = "";
-                          let lastName: string = "";
-                          let i = 0;
-                          for (const item of nameArr) {
-                            if (i > 1) {
-                              lastName += ` ${item}`;
-                            } else if (i === 1) {
-                              lastName += `${item}`;
-                            } else {
-                              firstName += item;
-                            }
-                            i++;
-                          }
                           setContactData({
                             ...contact,
-                            firstName,
-                            lastName,
+                            ...getFirstNameLastName(contact),
                           });
                           setContactOpen(false);
                           setEditing(true);
