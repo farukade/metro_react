@@ -70,7 +70,7 @@ export function Overview() {
 
   const getContacts = useCallback(async () => {
     try {
-      const url = `contact?key=${key}&limit=200`;
+      const url = `contact?key=${key}&limit=200&groupId=${group?.id || ""}`;
       const rs = await request(url, "GET", true);
       if (rs.success) {
         if (rs.result) {
@@ -78,13 +78,14 @@ export function Overview() {
           setContactOpen(true);
           if (!contact) {
             setContact(rs.result[0]);
+            setSelectedGroups(rs.result[0].groups);
           }
         }
       }
     } catch (error) {
       console.log(error);
     }
-  }, [key]);
+  }, [key, group]);
 
   const saveGroup = async () => {
     try {
@@ -98,7 +99,6 @@ export function Overview() {
       const rs = await request(url, "POST", true, datum);
       if (rs.success) {
         setContactGroups([rs.result, ...contactGroups]);
-        setContact(rs.result[0]);
         setNewGroup("");
         setContactError("");
         setGroupError("");
@@ -118,6 +118,7 @@ export function Overview() {
       if (rs.success) {
         const newItems = contacts?.filter((c: any) => c.id !== contact.id);
         setContact(newItems?.length ? newItems[0] : null);
+        setSelectedGroups(newItems?.length ? newItems[0].group : []);
         setContacts(newItems);
         setNewGroup("");
         setContactError("");
@@ -209,6 +210,7 @@ export function Overview() {
         setGroupError("");
         setEditing(false);
         getGroups();
+        setSelectedGroups(rs.result.groups);
       } else {
         setContactError(rs.message || "Error saving group!");
       }
@@ -273,7 +275,9 @@ export function Overview() {
   };
 
   useEffect(() => {
-    getGroups();
+    if (!contactGroups.length) {
+      getGroups();
+    }
     getContacts();
   }, [getGroups, getContacts]);
 
@@ -314,7 +318,10 @@ export function Overview() {
                   return (
                     <div className="d-flex flex-stack" key={i}>
                       <a
-                        // href="/metronic8/demo1/apps/contacts/getting-started.html"
+                        onClick={() => {
+                          setGroup(g);
+                        }}
+                        style={{ cursor: "pointer" }}
                         className="fs-6 fw-bold text-gray-800 text-hover-primary text-active-primary active"
                       >
                         {g.name}
@@ -454,6 +461,7 @@ export function Overview() {
                               <a
                                 onClick={() => {
                                   setContact(c);
+                                  setSelectedGroups(c.groups);
                                   setContactOpen(true);
                                 }}
                                 style={{ cursor: "pointer" }}
@@ -476,6 +484,7 @@ export function Overview() {
                                     "Are you sure you want to delete this transaction?",
                                   action: () => {
                                     setContact(c);
+                                    setSelectedGroups(c.groups);
                                     deleteContact();
                                   },
                                   close: () => {
@@ -497,6 +506,7 @@ export function Overview() {
                                   ...c,
                                   ...getFirstNameLastName(c),
                                 });
+                                setSelectedGroups(c.groups);
                               }}
                             >
                               <KTIcon iconName="pencil" className="fs-3" />
@@ -758,6 +768,20 @@ export function Overview() {
                       <div className="d-flex flex-column gap-1">
                         <div className="fw-bold text-muted">Description</div>
                         <p>{contact.description || "--"}</p>
+                      </div>
+
+                      <div className="d-flex gap-1">
+                        {selectedGroups?.map((sg: any) => {
+                          return (
+                            <span
+                              className={`p-2 badge badge-${
+                                bootstrapColors[getRandomNumber(0, 5)]
+                              }`}
+                            >
+                              {sg.name}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1226,6 +1250,7 @@ export function Overview() {
                       onClick={() => {
                         setContactOpen(true);
                         setContact(contacts[0]);
+                        setSelectedGroups(contacts[0].groups);
                         setEditing(false);
                       }}
                     >
