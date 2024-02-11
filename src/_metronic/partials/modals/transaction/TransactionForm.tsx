@@ -11,6 +11,8 @@ const TransactionForm = (props: {
   transactions: TransactionModel[];
   transaction: TransactionModel | null;
   transactionOpen: boolean;
+  setMeta: Dispatch<SetStateAction<any>>;
+  meta?: any;
 }) => {
   const {
     setTransactionOpen,
@@ -19,6 +21,8 @@ const TransactionForm = (props: {
     setTransactions,
     setTransaction,
     transactions,
+    meta,
+    setMeta,
   } = props;
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState("");
@@ -102,6 +106,9 @@ const TransactionForm = (props: {
         setTimeout(() => {
           setTransactionOpen(false);
         }, 300);
+        if (meta && meta.totalItems) {
+          setMeta({ ...meta, totalItems: meta.totalItems + 1 });
+        }
       } else {
         setStatus(message || "Submission failed!");
         setSubmitting(false);

@@ -9,6 +9,8 @@ import { KTIcon, formatCurrency } from "../../../helpers";
 import { TransactionModel, useAuth } from "../../../../app/modules/auth";
 import { request } from "../../../../app/modules/auth/core/_requests";
 import moment from "moment";
+import CustomPagination from "../../../helpers/components/Pagination";
+import { ConfirmationType } from "../../../layout/core";
 
 type Props = {
   className: string;
@@ -16,6 +18,9 @@ type Props = {
   setTransactions: Dispatch<SetStateAction<TransactionModel[]>>;
   setTransaction: Dispatch<SetStateAction<TransactionModel | null>>;
   setTransactionOpen: Dispatch<SetStateAction<boolean>>;
+  setConfirmation: Dispatch<SetStateAction<ConfirmationType | null>>;
+  setMeta: Dispatch<SetStateAction<any>>;
+  meta?: any;
 };
 
 const TablesWidget9: React.FC<Props> = ({
@@ -24,16 +29,18 @@ const TablesWidget9: React.FC<Props> = ({
   transactions,
   setTransactions,
   setTransaction,
+  setMeta,
+  setConfirmation,
+  meta,
 }) => {
   const { currentUser, setCurrentUser } = useAuth();
-  const [page] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(8);
 
-  const getTransactions = useCallback(async () => {
+  const getTransactions = useCallback(async (page = 1) => {
     try {
       document.body.classList.add("page-loading");
 
-      const url = `transaction?page=${page || 1}&limit=${limit || 10}`;
+      const url = `transaction?page=${page}&limit=${limit}`;
       const {
         success,
         message,
@@ -47,6 +54,7 @@ const TablesWidget9: React.FC<Props> = ({
         if (currentUser) {
           setCurrentUser({ ...currentUser, ...rest });
         }
+        setMeta(paging);
       } else {
         document.body.classList.remove("page-loading");
         console.log(message || "Error fetching transactions!");
@@ -55,7 +63,7 @@ const TablesWidget9: React.FC<Props> = ({
       document.body.classList.remove("page-loading");
       console.log(error);
     }
-  }, [page]);
+  }, []);
 
   const deleteTransaction = async (item: TransactionModel) => {
     try {
@@ -76,6 +84,9 @@ const TablesWidget9: React.FC<Props> = ({
           }
         }
         setTransactions(newData);
+        if (meta && meta.totalItems) {
+          setMeta({ ...meta, totalItems: meta.totalItems - 1 });
+        }
       } else {
         document.body.classList.remove("page-loading");
         console.log(message || "Error deleting transaction");
@@ -192,9 +203,18 @@ const TablesWidget9: React.FC<Props> = ({
                         <div className="d-flex justify-content-end flex-shrink-0">
                           <a
                             href="#"
-                            className="btn btn-icon btn-bg-light btn-active-color-primary btn-sm"
+                            className="btn btn-icon btn-bg-light btn-active-color-danger btn-sm"
                             onClick={() => {
-                              deleteTransaction(transaction);
+                              setConfirmation({
+                                message:
+                                  "Are you sure you want to delete this transaction?",
+                                action: () => {
+                                  deleteTransaction(transaction);
+                                },
+                                close: () => {
+                                  setConfirmation(null);
+                                },
+                              });
                             }}
                           >
                             <KTIcon iconName="trash" className="fs-3" />
@@ -218,6 +238,9 @@ const TablesWidget9: React.FC<Props> = ({
             </tbody>
             {/* end::Table body */}
           </table>
+          {meta && (
+            <CustomPagination meta={meta} navigatePage={getTransactions} />
+          )}
           {/* end::Table */}
         </div>
         {/* end::Table container */}

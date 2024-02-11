@@ -196,5 +196,4 @@ export const bootstrapColors = [
   "primary",
   "info",
   "warning",
-  "dark",
 ];

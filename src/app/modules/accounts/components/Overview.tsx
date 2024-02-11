@@ -7,6 +7,9 @@ import {
   request,
   uploadRequest,
 } from "../../auth/core/_requests";
+import { ConfirmationType } from "../../../../_metronic/layout/core";
+import ConfirmationModal from "../../../../_metronic/partials/modals/confirmation/Confirmation";
+import { KTIcon } from "../../../../_metronic/helpers";
 
 const API_URL = import.meta.env.VITE_APP_API_URL;
 
@@ -37,13 +40,16 @@ export function Overview() {
   const [group, setGroup] = useState<any>(null);
   const [newGroup, setNewGroup] = useState<string>("");
   const [contacts, setContacts] = useState<any>([]);
-  const [contact, setContact] = useState<any>([]);
+  const [contact, setContact] = useState<any>(null);
   const [groupError, setGroupError] = useState<string>("");
   const [contactError, setContactError] = useState<string>("");
   const [contactOpen, setContactOpen] = useState<boolean>(false);
   const [editing, setEditing] = useState<boolean>(false);
   const [key, setKey] = useState<string>("");
   const [contactData, setContactData] = useState<AddContact>(defaultNewContact);
+  const [confirmation, setConfirmation] = useState<ConfirmationType | null>(
+    null
+  );
 
   const getGroups = useCallback(async () => {
     try {
@@ -62,13 +68,15 @@ export function Overview() {
 
   const getContacts = useCallback(async () => {
     try {
-      const url = `contact?key=${key}`;
+      const url = `contact?key=${key}&limit=200`;
       const rs = await request(url, "GET", true);
       if (rs.success) {
         if (rs.result) {
           setContacts(rs.result);
           setContactOpen(true);
-          setContact(rs.result[0]);
+          if (!contact) {
+            setContact(rs.result[0]);
+          }
         }
       }
     } catch (error) {
@@ -100,10 +108,31 @@ export function Overview() {
     }
   };
 
+  const deleteContact = async () => {
+    try {
+      const url = `contact?id=${contact.id}`;
+
+      const rs = await request(url, "DELETE", true);
+      if (rs.success) {
+        const newItems = contacts?.filter((c: any) => c.id !== contact.id);
+        setContact(newItems?.length ? newItems[0] : null);
+        setContacts(newItems);
+        setNewGroup("");
+        setContactError("");
+        setGroupError("");
+      } else {
+        setContactError(rs.message || "Error saving group!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const saveContact = async () => {
     try {
       setContactError("");
-      const url = "contact";
+      const url = editing ? `contact?id=${contact.id}` : "contact";
+      const method = editing ? "PUT" : "POST";
       const {
         image,
         lastName,
@@ -136,18 +165,35 @@ export function Overview() {
         return;
       }
       setContactError("");
-      const datum = {
-        name: `${firstName} ${lastName}`,
-        email,
-        phone,
-        image: image || null,
-        description: description || null,
-        emailTwo: emailTwo || null,
-        phoneTwo: phoneTwo || null,
-      };
-      const rs = await request(url, "POST", true, datum);
+      const datum = editing
+        ? {
+            name: `${firstName} ${lastName}`,
+            email,
+            phone,
+            image,
+            description,
+            emailTwo,
+            phoneTwo,
+          }
+        : {
+            name: `${firstName} ${lastName}`,
+            email,
+            phone,
+            image: image || null,
+            description: description || null,
+            emailTwo: emailTwo || null,
+            phoneTwo: phoneTwo || null,
+          };
+      const rs = await request(url, method, true, datum);
       if (rs.success) {
-        setContacts([rs.result, ...contacts]);
+        if (editing) {
+          const otherContacts = contacts.filter(
+            (c: any) => c.id !== contact.id
+          );
+          setContacts([rs.result, ...otherContacts]);
+        } else {
+          setContacts([rs.result, ...contacts]);
+        }
         setContact(rs.result);
         setNewGroup("");
         setContactOpen(true);
@@ -187,12 +233,16 @@ export function Overview() {
   };
 
   const getNameAbbr = (item: string) => {
-    const namesArr = item.split(" ");
-    let result = "";
-    for (const name of namesArr) {
-      result += name[0].toUpperCase();
+    if (item) {
+      const namesArr = item.split(" ");
+      let result = "";
+      for (const name of namesArr) {
+        result += name[0].toUpperCase();
+      }
+      return result;
+    } else {
+      return "";
     }
-    return result;
   };
 
   useEffect(() => {
@@ -213,9 +263,7 @@ export function Overview() {
         </li>
         <li className="breadcrumb-item text-gray-900"></li>
       </ul>
-
       <div className="d-flex align-items-center gap-2 gap-lg-3"></div>
-
       <div className="row g-7">
         <div className="col-lg-6 col-xl-3">
           <div className="card card-flush">
@@ -306,7 +354,11 @@ export function Overview() {
             </div>
           </div>
         </div>
-        <div className="col-lg-6 col-xl-3">
+        <div
+          className={`col-lg-6 ${
+            contact && contactOpen ? "col-xl-4" : "col-xl-3"
+          }`}
+        >
           <div className="card card-flush" id="kt_contacts_list">
             <div className="card-header pt-7" id="kt_contacts_list_header">
               <form className="d-flex align-items-center position-relative w-100 m-0">
@@ -340,41 +392,80 @@ export function Overview() {
                 style={{ maxHeight: "755px" }}
               >
                 {contacts?.map((c: any, i: number) => {
-                  const cIndex = getRandomNumber(0, 5);
+                  const cIndex = getRandomNumber(0, 4);
                   const color = bootstrapColors[cIndex];
                   return (
                     <div key={i}>
-                      <div className="d-flex flex-stack py-4">
-                        <div className="d-flex align-items-center">
-                          <div className="symbol  symbol-40px symbol-circle ">
-                            {c.image === "placeholder.jpg" ||
-                            c.image === "" ||
-                            !c.image ? (
-                              <span
-                                className={`symbol-label  bg-light-${color} text-${color} fs-6 fw-bolder `}
-                              >
-                                {getNameAbbr(c.name)}
-                              </span>
-                            ) : (
-                              <img alt="Pic" src={`${API_URL}/${c.image}`} />
-                            )}
-                          </div>
+                      <div
+                        className="d-flex flex-stack py-4 "
+                        style={{ width: "100%" }}
+                      >
+                        <div
+                          className="d-flex align-items-between justify-content-between"
+                          style={{ width: "100%" }}
+                        >
+                          <div style={{ display: "flex" }}>
+                            <div className="symbol  symbol-40px symbol-circle ">
+                              {c.image === "placeholder.jpg" ||
+                              c.image === "" ||
+                              !c.image ? (
+                                <span
+                                  className={`symbol-label  bg-light-${color} text-${color} fs-6 fw-bolder `}
+                                >
+                                  {getNameAbbr(c.name)}
+                                </span>
+                              ) : (
+                                <img alt="Pic" src={`${API_URL}/${c.image}`} />
+                              )}
+                            </div>
 
-                          <div className="ms-4">
+                            <div className="ms-4">
+                              <a
+                                onClick={() => {
+                                  setContact(c);
+                                  setContactOpen(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                                className={`fs-6 fw-bold text-gray-900 text-hover-${color} mb-2`}
+                              >
+                                {startCase(c.name)}
+                              </a>
+                              <div className="fw-semibold fs-7 text-muted">
+                                {c.email?.toLowerCase()}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="d-flex justify-content-end flex-shrink-0">
                             <a
-                              // href="/metronic8/demo1/apps/contacts/view-contact.html"
+                              href="#"
+                              className="btn btn-icon btn-bg-light btn-active-color-danger btn-sm"
+                              onClick={() => {
+                                setConfirmation({
+                                  message:
+                                    "Are you sure you want to delete this transaction?",
+                                  action: () => {
+                                    setContact(c);
+                                    deleteContact();
+                                  },
+                                  close: () => {
+                                    setConfirmation(null);
+                                  },
+                                });
+                              }}
+                            >
+                              <KTIcon iconName="trash" className="fs-3" />
+                            </a>
+                            <a
+                              href="#"
+                              className="btn btn-icon btn-bg-light btn-active-color-primary btn-sm"
                               onClick={() => {
                                 setContact(c);
-                                setContactOpen(true);
+                                setEditing(true);
+                                setContactOpen(false);
                               }}
-                              style={{ cursor: "pointer" }}
-                              className={`fs-6 fw-bold text-gray-900 text-hover-${color} mb-2`}
                             >
-                              {startCase(c.name)}
+                              <KTIcon iconName="pencil" className="fs-3" />
                             </a>
-                            <div className="fw-semibold fs-7 text-muted">
-                              {c.email?.toLowerCase()}
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -398,36 +489,12 @@ export function Overview() {
                     <div className="separator separator-dashed d-none"></div>
                   </div>
                 )}
-
-                {/* <div className="d-flex flex-stack py-4">
-                  <div className="d-flex align-items-center">
-                    <div className="symbol  symbol-40px symbol-circle ">
-                      <span className="symbol-label  bg-light-danger text-danger fs-6 fw-bolder ">
-                        M
-                      </span>
-                      <div className="symbol-badge bg-success start-100 top-100 border-4 h-15px w-15px ms-n2 mt-n2"></div>
-                    </div>
-                    <div className="ms-4">
-                      <a
-                        href="/metronic8/demo1/apps/contacts/view-contact.html"
-                        className="fs-6 fw-bold text-gray-900 text-hover-primary mb-2"
-                      >
-                        Melody Macy
-                      </a>
-                      <div className="fw-semibold fs-7 text-muted">
-                        melody@altbox.com
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="separator separator-dashed d-none"></div> */}
               </div>
             </div>
           </div>
         </div>
         {contact && contactOpen ? (
-          <div className="col-xl-6">
+          <div className="col-xl-5">
             {contactError && contactError !== "" && (
               <div
                 className="alert alert-danger"
@@ -504,7 +571,13 @@ export function Overview() {
                         // href="#"
                         className="menu-link px-3"
                         id="kt_contact_delete"
-                        data-kt-redirect="/metronic8/demo1/apps/contacts/getting-started.html"
+                        onClick={() => {
+                          setConfirmation({
+                            message: "Are you sure you want to delete contact?",
+                            action: () => deleteContact(),
+                            close: () => setConfirmation(null),
+                          });
+                        }}
                       >
                         Delete
                       </a>
@@ -1089,6 +1162,15 @@ export function Overview() {
           </div>
         )}
       </div>
+      {confirmation && (
+        <ConfirmationModal
+          action={confirmation.action}
+          message={confirmation.message}
+          close={() => {
+            setConfirmation(null);
+          }}
+        />
+      )}
     </Content>
   );
 }
