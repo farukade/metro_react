@@ -248,7 +248,9 @@ export function Overview() {
       const namesArr = item.split(" ");
       let result = "";
       for (const name of namesArr) {
-        result += name[0].toUpperCase();
+        if (name && name.length) {
+          result += name[0].toUpperCase();
+        }
       }
       return result;
     } else {
@@ -1250,7 +1252,7 @@ export function Overview() {
                       onClick={() => {
                         setContactOpen(true);
                         setContact(contacts[0]);
-                        setSelectedGroups(contacts[0].groups);
+                        setSelectedGroups(contacts[0]?.groups);
                         setEditing(false);
                       }}
                     >
