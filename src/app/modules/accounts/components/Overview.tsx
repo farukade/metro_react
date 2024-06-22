@@ -11,6 +11,7 @@ import { ConfirmationType } from "../../../../_metronic/layout/core";
 import ConfirmationModal from "../../../../_metronic/partials/modals/confirmation/Confirmation";
 import { KTIcon } from "../../../../_metronic/helpers";
 import Select from "react-select";
+import { getTwoLongestNames } from "../../../../_metronic/helpers/utils";
 
 const API_URL = import.meta.env.VITE_APP_API_URL;
 
@@ -469,7 +470,7 @@ export function Overview() {
                                 style={{ cursor: "pointer" }}
                                 className={`fs-6 fw-bold text-gray-900 text-hover-${color} mb-2`}
                               >
-                                {startCase(c.name)}
+                                {startCase(getTwoLongestNames(String(c.name)))}
                               </a>
                               <div className="fw-semibold fs-7 text-muted">
                                 {c.email?.toLowerCase()}
