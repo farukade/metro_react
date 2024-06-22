@@ -453,7 +453,9 @@ export function Overview() {
                                 <span
                                   className={`symbol-label  bg-light-${color} text-${color} fs-6 fw-bolder `}
                                 >
-                                  {getNameAbbr(c.name)}
+                                  {getNameAbbr(
+                                    getTwoLongestNames(String(c.name))
+                                  )}
                                 </span>
                               ) : (
                                 <img alt="Pic" src={`${API_URL}/${c.image}`} />
